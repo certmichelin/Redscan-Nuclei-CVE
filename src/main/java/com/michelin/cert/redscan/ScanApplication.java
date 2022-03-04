@@ -200,7 +200,7 @@ public class ScanApplication {
             message,
             service.toUrl(),
             "redscan-nuclei-cve",
-            new String[]{CommonTags.}
+            new String[]{CommonTags.VULNERABILITY}
     );
 
     rabbitTemplate.convertAndSend(vuln.getFanoutExchangeName(), "", vuln.toJson());
