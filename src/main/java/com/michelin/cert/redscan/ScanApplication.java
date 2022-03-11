@@ -148,7 +148,11 @@ public class ScanApplication {
         JSONObject info = (JSONObject) jsonResult.get("info");
         String name = (String) info.get("name");
         String severity = (String) info.get("severity");
-
+        
+        //Retrieve CVE information
+        JSONObject cveInfo = (JSONObject) info.get("classification");
+        String cveId = (String) cveInfo.get("cve-id");
+        
         //Retrieve extracted results.
         JSONArray extractedResultArray = (JSONArray) jsonResult.get("extracted-results");
         String extractedResult = "";
@@ -161,7 +165,7 @@ public class ScanApplication {
         raiseVulnerability(convertNucleiSeverity(severity),
                 httpService,
                 templateId,
-                String.format("CVE found on %s : %s", httpService.toUrl(), name),
+                String.format("%s found on %s : %s",cveId, httpService.toUrl(), name),
                 String.format("The CVE was detected on : %s %s", url, extractedResult));
       }
     } catch (ParseException e) {
