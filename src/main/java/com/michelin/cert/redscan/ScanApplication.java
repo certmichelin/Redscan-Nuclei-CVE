@@ -53,7 +53,7 @@ public class ScanApplication {
   private final RabbitTemplate rabbitTemplate;
 
   /**
-   * Constructor to init rabbit template. Only required if pushing data to queues
+   * Constructor to init rabbit template. Only required if pushing data to queues.
    *
    * @param rabbitTemplate Rabbit template.
    */
@@ -102,7 +102,7 @@ public class ScanApplication {
         if (streamGobbler.getExitStatus() == 0) {
           JSONArray results = analyzeLines(httpMessage, streamGobbler.getStandardOutputs());
           LogManager.getLogger(ScanApplication.class).info(String.format("Nuclei output for %s : %s ", httpMessage.toUrl(), results.toString()));
-          httpMessage.upsertField( "nucleicve", results);
+          httpMessage.upsertField("nucleicve", results);
         }
       }
 
@@ -144,20 +144,23 @@ public class ScanApplication {
         String url = (String) jsonResult.get("matched-at");
         String templateId = (String) jsonResult.get("template-id");
 
-        //Retrieve template info
-        JSONObject info = (JSONObject) jsonResult.get("info");
-        String name = (String) info.get("name");
-        String severity = (String) info.get("severity");
-        
-        //Retrieve CVE information
-        JSONObject cveInfo = (JSONObject) info.get("classification");
-        String cveId = (String) cveInfo.get("cve-id");
-        
         //Retrieve extracted results.
         JSONArray extractedResultArray = (JSONArray) jsonResult.get("extracted-results");
         String extractedResult = "";
         if (extractedResultArray != null) {
           extractedResult = String.format(", Extracted values : %s", extractedResultArray.toString());
+        }
+        
+        //Retrieve template info
+        JSONObject info = (JSONObject) jsonResult.get("info");
+        String name = (String) info.get("name");
+        String severity = (String) info.get("severity");
+
+        //Retrieve CVE information
+        String cveId = "Vulnerability";
+        JSONObject cveInfo = (JSONObject) info.get("classification");
+        if (cveInfo != null) {
+          cveId = (String) cveInfo.get("cve-id");
         }
 
         LogManager.getLogger(ScanApplication.class).info(String.format("CVEs [%s] found  %s", templateId, url));
@@ -165,7 +168,7 @@ public class ScanApplication {
         raiseVulnerability(convertNucleiSeverity(severity),
                 httpService,
                 templateId,
-                String.format("%s found on %s : %s",cveId, httpService.toUrl(), name),
+                String.format("%s found on %s : %s", cveId, httpService.toUrl(), name),
                 String.format("The CVE was detected on : %s %s", url, extractedResult));
       }
     } catch (ParseException e) {
